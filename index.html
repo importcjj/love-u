@@ -37,18 +37,153 @@
   <!--<link rel="apple-touch-icon" href=".png" />-->
   <!--<link rel="apple-touch-icon-precomposed" href=".png" />-->
 
-  <link rel="stylesheet" type="text/css" href="style-mobile.css"/>
+  <style>
+    * {
+  margin: 0px;
+  padding: 0px;
+}
+
+canvas {
+  display: block;
+}
+   </style>
 
 </head>
 <body>
-  <canvas id="GameCanvas" oncontextmenu="event.preventDefault()" tabindex="0"></canvas>
-  <div id="splash">
-    <div class="progress-bar stripes">
-      <span style="width: 0%"></span>
-    </div>
-  </div>
-<script src="src/settings.js" charset="utf-8"></script>
+  <canvas id="canvas"></canvas>
 
-<script src="main.js" charset="utf-8"></script>
+<script>
+  	var canvas = document.getElementById("canvas");
+	var c = canvas.getContext("2d");
+
+	//Canvas dimensions
+	var W = window.innerWidth;
+	var H = window.innerHeight;   
+	canvas.width = W;
+	canvas.height = H; 
+
+	//Background
+var customBackgroundColor = "#4CB2F6"
+var colors = [customBackgroundColor, "white", "black", "yellow", "blue", "red", "green"];
+	var backgroundColor = colors[0];
+
+	c.fillStyle = backgroundColor;
+	c.fillRect(0, 0, canvas.width, canvas.height);
+
+	function random(min, max) {
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
+
+function Flower(){
+  this.pedalPositionX = 100;
+  this.pedalPositionY = this.pedalPositionX;
+  this.pedalColor = "#b43f51"; 
+  
+  this.eyePositionX = this.pedalPositionX + 90;
+  this.eyePositionY = this.pedalPositionY + 90;
+  this.eyeColor = "#FFD34E";
+  this.eyeSize = 40;
+  
+  this.stemColor = "#0f8e18";
+  this.stemPositionX = this.eyePositionX;
+  this.stemPositionY = canvas.height;
+  this.stemWidth = 5;
+  
+  this.message = "Click on the canvas.";
+  
+  this.reset = function(){  
+    this.pedalPositionX = 100;
+    this.pedalPositionY = this.pedalPositionX;
+    this.pedalColor = "#b43f51"; 
+    
+    this.eyePositionX = this.pedalPositionX + 90;
+    this.eyePositionY = this.pedalPositionY + 90;
+    this.eyeColor = "#FFD34E";
+    this.eyeSize = 40;
+  
+    this.stemColor = "#0f8e18";
+    this.stemPositionX = this.eyePositionX;
+    this.stemPositionY = canvas.height;
+    this.stemWidth = 5;
+  
+    this.message = "Click on the canvas.";
+  };
+}
+
+Flower.prototype.draw = function(){
+  // Stem
+  c.strokeStyle = this.stemColor;
+  c.beginPath();
+  c.lineWidth = this.stemWidth;
+  c.moveTo(this.stemPositionX, this.stemPositionY);
+  c.lineTo(this.eyePositionX, this.eyePositionY);
+  c.closePath();
+  c.stroke();
+  
+  // Pedals
+  c.fillStyle = this.pedalColor;
+	  c.beginPath();
+	  c.moveTo(130.3+this.pedalPositionX, 37.6+this.pedalPositionY);
+	  c.bezierCurveTo(126.0+this.pedalPositionX, -8.3+this.pedalPositionY, 56.3+this.pedalPositionX, -16.6+this.pedalPositionX, 47.4+this.pedalPositionX, 37.6+this.pedalPositionY);
+	  c.bezierCurveTo(-1.4+this.pedalPositionX, 33.0+this.pedalPositionY, -17.0+this.pedalPositionX, 93.7+this.pedalPositionX, 21.9+this.pedalPositionX, 115.6+this.pedalPositionY);
+  c.bezierCurveTo(5.6+this.pedalPositionX, 158.7+this.pedalPositionY, 55.0+this.pedalPositionX, 192.7+this.pedalPositionX, 88.8+this.pedalPositionX, 162.3+this.pedalPositionY);
+	  c.bezierCurveTo(119.3+this.pedalPositionX, 191.4+this.pedalPositionY, 172.3+this.pedalPositionX, 162.0+this.pedalPositionX, 155.7+this.pedalPositionX, 115.7+this.pedalPositionY);
+  c.bezierCurveTo(192.0+this.pedalPositionX, 98.4+this.pedalPositionY, 183.6+this.pedalPositionX, 33.7+this.pedalPositionX, 130.3+this.pedalPositionX, 37.6+this.pedalPositionY);
+	  c.closePath();
+  c.fill();   
+  
+  // Eye
+  c.fillStyle = this.eyeColor;
+  c.beginPath();
+  c.arc(this.eyePositionX, this.eyePositionY, this.eyeSize, 0, 2*Math.PI);
+  c.closePath();
+  c.fill();
+ 
+};
+
+var f = new Flower();
+
+canvas.onclick = function(){
+  backgroundColor = colors[random(1, 6)];
+}; 
+
+setInterval(function(){
+  	c.fillStyle = backgroundColor;
+  	c.fillRect(0, 0, canvas.width, canvas.height);
+  
+  f.draw();
+}, 33);
+
+var gui = new dat.GUI();
+
+// Folders
+var pedal = gui.addFolder("Pedal");
+var eye = gui.addFolder("Eye");
+var stem = gui.addFolder("Stem");
+
+// Pedal Properties
+pedal.add(f, "pedalPositionX", 0, canvas.width).listen();
+pedal.add(f, "pedalPositionY", 0, canvas.height).listen();
+pedal.addColor(f, "pedalColor").listen();
+pedal.open();
+
+// Eye properties
+eye.add(f, "eyePositionX", 0, canvas.width).listen();
+eye.add(f, "eyePositionY", 0, canvas.height).listen();
+eye.add(f, "eyeSize", 10, 50).listen();
+eye.addColor(f, "eyeColor").listen();
+eye.open();
+
+// Stem
+stem.add(f, "stemPositionX", 0, canvas.width).listen();
+stem.add(f, "stemPositionY", 0, canvas.height).listen();
+stem.add(f, "stemWidth", 0, 50).listen();
+stem.addColor(f, "stemColor").listen();
+stem.open();
+// Reset
+gui.add(f, "message").listen();
+gui.add(f, "reset");
+
+</script>
 </body>
 </html>
